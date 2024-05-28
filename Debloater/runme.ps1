@@ -1,2 +1,2 @@
-Start-Process -Verb RunAs powershell -ArgumentList "-File $env:USERPROFILE\Documents\Git\WindowsInstall\Debloater\settings.ps1"
-Start-Process -Verb RunAs powershell -ArgumentList "-File $env:USERPROFILE\Documents\Git\WindowsInstall\Debloater\uninstaller.ps1"
+Start-Process -Verb RunAs powershell -ArgumentList "-File $PSScriptRoot\settings.ps1"
+Start-Process -Verb RunAs powershell -ArgumentList "-File $PSScriptRoot\uninstaller.ps1"
