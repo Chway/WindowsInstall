@@ -23,7 +23,7 @@ $pss = Get-ChildItem "settings\ps\"
 $pssCount = ($pss | Measure-Object).Count
 $i = 0
 foreach ($ps in $pss) {
-    powershell.exe -ExecutionPolicy RemoteSigned -File $ps.FullName | Out-Null
+    powershell.exe -ExecutionPolicy Bypass -File $ps.FullName | Out-Null
     $i++
     Write-Progress -Activity "Running Scripts" -Status "Status: $i of $($pssCount)" -PercentComplete (($i / $pssCount) * 100)
 }
