@@ -20,7 +20,7 @@ $tools = @(
     Output    = "GitSetup.exe"
     GithubApi = $true
     Regex     = "Git-.*-64-bit\.exe"
-    Disabled  = $false
+    Disabled  = $true
   }
   @{
     Url       = "https://api.github.com/repos/ip7z/7zip/releases/latest"
@@ -34,7 +34,7 @@ $tools = @(
     Output    = "Notepad3Setup.exe"
     GithubApi = $true
     Regex     = "Notepad3_.*_x64_Setup\.exe"
-    Disabled  = $false
+    Disabled  = $true
   }
 )
 
