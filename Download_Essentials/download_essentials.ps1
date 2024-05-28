@@ -29,6 +29,13 @@ $tools = @(
     Regex     = "7z.*-x64\.exe"
     Disabled  = $false
   }
+  @{
+    Url       = "https://api.github.com/repos/rizonesoft/Notepad3/releases/latest"
+    Output    = "Notepad3Setup.exe"
+    GithubApi = $true
+    Regex     = "Notepad3_.*_x64_Setup\.exe"
+    Disabled  = $false
+  }
 )
 
 $current_dir = (Get-Location).path
