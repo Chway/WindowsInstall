@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\System\GameConfigStore]
+"GameDVR_FSEBehaviorMode"=dword:2
+
+[HKEY_CURRENT_USER\System\GameConfigStore]
+"GameDVR_HonorUserFSEBehaviorMode"=dword:1
+
+[HKEY_CURRENT_USER\System\GameConfigStore]
+"GameDVR_FSEBehavior"=dword:2
+
+[HKEY_CURRENT_USER\System\GameConfigStore]
+"GameDVR_DXGIHonorFSEWindowsCompatible"=dword:1
