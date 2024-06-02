@@ -1,12 +1,5 @@
 #Requires -RunAsAdministrator
-
-$PSVersion = $PSVersionTable.PSVersion
-$PSVersionStr = "$($PSVersion.Major).$($PSVersion.Minor)"
-if ($PSVersionStr -ne "5.1") {
-  Write-Output "PowerShell 5.1 is needed to run this script."
-}
-
-Import-Module Appx
+$ProgressPreference = "SilentlyContinue"
 
 $archs = @{
   ([uint32]5)     = "Arm"
@@ -18,56 +11,81 @@ $archs = @{
   ([uint32]14)    = "X86OnArm64"
 }
 
-function Print {
-  param(
-    [Parameter(Mandatory, Position = 0)]
-    [string]$Prefix,
-    [Parameter(Mandatory, Position = 1)]
-    [string]$Action,
-    [Parameter(Position = 2)]
-    [string]$Str
-  )
+$HideNonRemovable = $true
+$HideFramework = $false
+$KeepFramework = $true
 
-  switch ($Action) {
-    "REMOVE" { $ColorAction = "Green" }
-    "MISS" { $ColorAction = "Red" }
-    Default { $ColorAction = "White" }
+# https://stackoverflow.com/questions/4647756/is-there-a-way-to-specify-a-font-color-when-using-write-output
+function Write-ColorOutput($ForegroundColor) {
+  $fc = $host.UI.RawUI.ForegroundColor
+  $host.UI.RawUI.ForegroundColor = $ForegroundColor
+
+  if ($args) {
+    Write-Output $args
+  } else {
+    $input | Write-Output
   }
 
-  Write-Host -ForegroundColor "Yellow" "$($Prefix)" -NoNewline
-  Write-Host ":" -NoNewline
-  Write-Host -ForegroundColor $ColorAction "$Action" -NoNewline
-  Write-Host " $Str"
+  $host.UI.RawUI.ForegroundColor = $fc
 }
 
 $remTable = @{}
 $json = Get-Content -Raw "$PSScriptRoot\apps.json" | ConvertFrom-Json 
 $json.apps | ForEach-Object { $remTable[$_.name] = $_.remove }
-$AllApps = Get-AppxPackage -AllUsers
-$AllProvApps = Get-AppxProvisionedPackage -Online
 
-$ProgressPreference = "SilentlyContinue"
-foreach ($App in $AllApps) {
+Function Remove-Appx {
+  Write-Output "[AppxPackage]" | Write-ColorOutput Blue
+  $AllApps = Get-AppxPackage -AllUsers | Sort-Object
+  foreach ($App in $AllApps) {
+    if ($App.NonRemovable) {
+      if (!($HideNonRemovable)) {
+        Write-Output "[AP][SKIP] $($App.Name) ($($App.Architecture))" | Write-ColorOutput DarkGray
+      }
+      Continue
+    }
+
+    if ($App.IsFramework -And $KeepFramework) {
+      if (!($HideFramework)) {
+        Write-Output "[AP][SKIP] $($App.Name) ($($App.Architecture))" | Write-ColorOutput DarkGray
+      }
+      Continue
+    }
+
+  }
+  
   if ($remTable.ContainsKey($App.Name)) {
     if ($remTable.($App.Name)) {
-      Print "AP" "REMOVE" "$($App.Name) ($($App.Architecture))"
+      Write-Output "[AP][REMO] $($App.Name) ($($App.Architecture))"
       Remove-AppxPackage -Package $App.PackageFullName | Out-Null
+    } else {
+      Write-Output "[AP][KEEP] $($App.Name) ($($App.Architecture))"
     }
   } else {
-    Print "AP" "MISS" "$($App.Name) ($($App.Architecture), Removable: $(-not $App.NonRemovable))"
+    Write-Output "[AP][MISS] $($App.Name) ($($App.Architecture))" | Write-ColorOutput Red
   }
 }
 
-foreach ($App in $AllProvApps) {
-  if ($remTable.ContainsKey($App.DisplayName)) {
-    if ($remTable.($App.DisplayName)) {
-      Print "APP" "REMOVE" "$($App.DisplayName) ($($archs.($App.Architecture)))"
-      Remove-AppxProvisionedPackage -Online -PackageName $App.PackageName | Out-Null
+Function Remove-AppxProv {
+  Write-Output "`n[AppxProvisionedPackage]" | Write-ColorOutput Blue
+  $AllProvApps = Get-AppxProvisionedPackage -Online | Sort-Object
+  foreach ($App in $AllProvApps) {
+    if ($remTable.ContainsKey($App.DisplayName)) {
+      if ($remTable.($App.DisplayName)) {
+        Write-Output "[APP][REMO] $($App.DisplayName) ($($archs.($App.Architecture)))"
+        Remove-AppxProvisionedPackage -Online -PackageName $App.PackageName | Out-Null
+      } else {
+        Write-Output "[APP][KEEP] $($App.DisplayName) ($($archs.($App.Architecture)))"
+      }
+    } else {
+      Write-Output "[APP][MISS] $($App.DisplayName) ($($archs.($App.Architecture)))" | Write-ColorOutput Red
     }
-  } else {
-    Print "APP" "MISS" "$($App.DisplayName) ($($archs.($App.Architecture)))"
   }
 }
+
+$timeRemoveAppx = Measure-Command { Remove-Appx | Out-Default }
+Write-Output "Elapsed: $($timeRemoveAppx.TotalSeconds) second(s)"
+$timeRemoveAppxProv = Measure-Command { Remove-AppxProv | Out-Default }
+Write-Output "Elapsed: $($timeRemoveAppxProv.TotalSeconds) second(s)"
+
 $ProgressPreference = "Continue"
-
 Pause
