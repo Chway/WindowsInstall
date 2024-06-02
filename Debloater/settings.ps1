@@ -29,4 +29,4 @@ foreach ($ps in $pss) {
 }
 
 Write-Progress -Activity "Running OOSU10"
-& shutup10 "..\OOSU10\ooshutup10.cfg" "/quiet" "/nosrp"
+& OOSU10 "..\OOSU10\ooshutup10.cfg" "/quiet" "/nosrp"
