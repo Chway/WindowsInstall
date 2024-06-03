@@ -16,7 +16,7 @@ $archs = @{
 $HideSkip = $true
 $SkipFramework = $true
 $SkipResource = $true
-$AllUsers = $false
+$AllUsers = $true
 $CleanProvisioned = $false
 
 # https://stackoverflow.com/questions/4647756/is-there-a-way-to-specify-a-font-color-when-using-write-output
