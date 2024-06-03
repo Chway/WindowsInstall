@@ -86,12 +86,12 @@ Function Clean-AppxProv {
   }
 }
 
-$timeRemoveAppx = Measure-Command { Clean-Appx | Out-Default }
-Write-Output "Elapsed: $($timeRemoveAppx.TotalSeconds) second(s)"
+$timeCleanAppx = Measure-Command { Clean-Appx | Out-Default }
+Write-Output "Elapsed: $($timeCleanAppx.TotalSeconds) second(s)"
 
 if ($CleanProvisioned) {
-  $timeRemoveAppxProv = Measure-Command { Clean-AppxProv | Out-Default }
-  Write-Output "Elapsed: $($timeRemoveAppxProv.TotalSeconds) second(s)"
+  $timeCleanAppxProv = Measure-Command { Clean-AppxProv | Out-Default }
+  Write-Output "Elapsed: $($timeCleanAppxProv.TotalSeconds) second(s)"
 }
 
 $ProgressPreference = "Continue"
